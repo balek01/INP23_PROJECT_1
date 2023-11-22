@@ -415,7 +415,7 @@ BEGIN
           PC_DEC <= '1';
           N_STATE <= exec_while_end_read_instr;
         END IF;
-
+        -- PRINT
       WHEN exec_print =>
         PC_INC <= '1';
         DATA_EN <= '1'; -- enable memory 
@@ -428,15 +428,15 @@ BEGIN
           OUT_DATA <= DATA_RDATA;
           N_STATE <= fetch;
         ELSE
-          N_STATE <= exec_print_wait;
+          N_STATE <= exec_print_wait; -- vait out busy 0
         END IF;
-
+        -- LOAD
       WHEN exec_load =>
         IN_REQ <= '1';
         IF (IN_VLD = '1') THEN
           N_STATE <= exec_load_write;
         ELSE
-          N_STATE <= exec_load;
+          N_STATE <= exec_load; -- wait for in_vld
         END IF;
       WHEN exec_load_write =>
         PC_INC <= '1';
@@ -447,20 +447,20 @@ BEGIN
         N_STATE <= fetch;
 
         -- BREAK
-        -- set ptr to x+1 (mem[x]=@)
       WHEN exec_while_break =>
         CNT_ONE <= '1';
         N_STATE <= exec_while_break_cycle;
       WHEN exec_while_break_cycle =>
         PC_INC <= '1'; -- post-icrement pointer
-        -- read data from PTR
-        MX1_SEL <= '0'; -- data
+        -- read data from PC
+        MX1_SEL <= '0'; -- code
         DATA_RDWR <= '0'; -- read
         DATA_EN <= '1'; -- enable memory
         N_STATE <= exec_while_break_compare;
-        -- inc ptr until @ is found
+        -- inc ptr until ] is found and cnt is 0
       WHEN exec_while_break_compare =>
-        -- compare data at PTR equals @
+        -- increment cnt for every [
+        -- decrement cnt for every ]
         IF (DATA_RDATA = X"5B") THEN
           CNT_INC <= '1';
         ELSIF (DATA_RDATA = X"5D") THEN
@@ -468,9 +468,9 @@ BEGIN
         END IF;
         N_STATE <= exec_while_break_is_cnt_zero;
       WHEN exec_while_break_is_cnt_zero =>
-        IF (CNT_IS_ZERO = '1') THEN
+        IF (CNT_IS_ZERO = '1') THEN -- found all matching paretheses
           N_STATE <= fetch;
-        ELSE
+        ELSE -- continue to cycle trough
           N_STATE <= exec_while_break_cycle;
         END IF;
     END CASE;
