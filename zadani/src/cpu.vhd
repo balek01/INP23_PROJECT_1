@@ -1,7 +1,7 @@
 -- cpu.vhd: Simple 8-bit CPU (BrainFuck interpreter)
 -- Copyright (C) 2023 Brno University of Technology,
 --                    Faculty of Information Technology
--- Author(s): jmeno <login AT stud.fit.vutbr.cz>
+-- Author(s): Miroslav Bálek <xbalek02>
 --
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
